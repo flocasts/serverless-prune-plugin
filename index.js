@@ -92,7 +92,7 @@ class Prune {
 
     this.serverless.cli.log('Prune: Querying for deployed versions');
 
-    return BbPromise.mapSeries(functionNames, functionName => {
+    return BbPromise.map(functionNames, functionName => {
 
       return BbPromise.join(
         this.listVersionForFunction(functionName),
@@ -100,7 +100,7 @@ class Prune {
         (versions, aliases) => ( { name: functionName, versions: versions, aliases: aliases } )
       );
 
-    }).each(functionResult => {
+    }, {concurrency: 1}).each(functionResult => {
 
       if (!functionResult.versions.length)
         return BbPromise.resolve();
@@ -189,7 +189,7 @@ class Prune {
     };
 
     return this.provider.request('Lambda', action, params)
-      .delay(1000)
+      .delay(5000)
       .then(responseHandler);
   }
 
